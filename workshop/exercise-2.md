@@ -50,7 +50,7 @@ Agent skills live in `.github/skills/<skill-name>/SKILL.md`. The `name` and `des
 
 1. Still in Copilot Chat, send:
 
-```
+````
 Create the file .github/skills/quarkus-migration/SKILL.md with the following content exactly:
 
 ---
@@ -131,7 +131,7 @@ Delete `SwaggerConfig.java` entirely. The `quarkus-smallrye-openapi` extension p
 - Swagger UI at `/q/swagger-ui`
 
 No Java configuration class is needed.
-```
+````
 
 2. Review and **accept** the file.
 
