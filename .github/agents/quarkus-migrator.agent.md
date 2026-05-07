@@ -33,11 +33,11 @@ Print one of these lines immediately before every action:
 
 **This phase is mandatory. Do not skip it and do not infer answers from the user's opening prompt. Do not read any file until all four answers are explicitly provided by the user.**
 
-Present all four questions at once and wait for the user to reply:
+Present these four questions one by one and wait for the user to reply:
 
-**[WAITING] Before I start, I need your answers to four quick questions:**
+**[WAITING] Before I start, I need your answers to quick questions:**
 
-**Q1. Have you already created `workshop/migration-tasks.md`** (from Exercise 3)?
+**Q1. Have you already created `tasks-list.md`** (from Exercise 3)?
 - A) Yes — use it as the task list
 - B) No — I will generate the task list from the source files myself
 
@@ -59,15 +59,15 @@ Present all four questions at once and wait for the user to reply:
 
 ## Phase 0b — Read Inputs
 
-After receiving all answers, announce and read each input file:
+After receiving all answers plan execution based on the user's responses, announce and read each input file:
 
 ```
-[READ]    workshop/migration-tasks.md — loading the ordered task list
+[READ]    workshop/tasks-list.md — loading the ordered task list
 [READ]    workshop/migration-plan.md — loading the phased plan (if it exists)
 [READ]    .github/skills/quarkus-migration/SKILL.md — loading the five migration rules
 ```
 
-If `migration-tasks.md` does not exist (Q1=B), read each source file to build the task list yourself and announce each read:
+If `tasks-list.md` does not exist (Q1=B), read each source file to build the task list yourself and announce each read:
 
 ```
 [READ]    pom.xml — inspecting Spring Boot dependencies
@@ -78,10 +78,10 @@ If `migration-tasks.md` does not exist (Q1=B), read each source file to build th
 [READ]    src/main/java/com/englishcentral/crud/exception/AppException.java
 ```
 
-After reading all inputs, print the migration plan and ask for confirmation:
+After reading all inputs, Depending on the user's answers, print the migration plan and ask for confirmation:
 
 ```
-[DONE]    Inputs loaded. Migration plan:
+[DONE]    Inputs loaded. Migration plan: depending on Q2 answer, either print the full phased plan or the specific phase plan. Awaiting your confirmation to proceed. show these depending on Q2 answer:
            Phase 1 — pom.xml + application.properties
            Phase 2 — Product.java (javax → jakarta)
            Phase 3 — ProductRepository.java (JpaRepository → PanacheRepository)
@@ -89,9 +89,6 @@ After reading all inputs, print the migration plan and ask for confirmation:
            Phase 5 — AppException.java + delete SwaggerConfig.java + CrudApplication.java
 ```
 
-**[WAITING] Ready to start. Confirm:**
-- A) Proceed with all phases listed above
-- B) Let me change something first — describe what
 
 ---
 
@@ -359,9 +356,11 @@ If compilation fails:
 After 3 failed attempts, ask:
 
 **[WAITING] Compilation is still failing after 3 attempts. How would you like to proceed?**
-- A) Show me the full error output — I will fix it manually
+- A)  Allow me to look at the codebase and fix it myself, then re-run the agent to verify the build
 - B) Try a different approach — describe what you want me to try
-- C) Stop here and report what was completed so far
+- C) Show me the full error output — I will fix it manually
+
+Execute the user's choice. Do not proceed to the final report until a successful compilation is achieved.
 
 If compilation succeeds:
 
@@ -377,7 +376,7 @@ Print a completion summary:
 
 ```
 [DONE]    Migration complete. Summary of all changes:
-
+  Example:
   Phase 1 — Build & Config
   ✅  pom.xml                  Spring Boot parent removed; Quarkus BOM + 5 extensions added
   ✅  application.properties   spring.*/server.* replaced with quarkus.* equivalents
