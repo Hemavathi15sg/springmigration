@@ -41,26 +41,13 @@ Explain what the Quarkus Migrator agent in .github/agents/quarkus-migrator.agent
 
 Open Copilot Chat and switch to the **Quarkus Migrator** agent using the agent picker (selecting `Quarkus Migrator` from the mode dropdown).
 
-Paste this single prompt
+Send this short prompt — the agent will ask you clarification questions before doing anything:
 
 ```
-Run the full Quarkus migration.
-
-1. Read workshop/migration-tasks.md for the ordered task list.
-2. Read .github/skills/quarkus-migration/SKILL.md for the five migration rules.
-3. Migrate all files in phase order (Phase 1: pom.xml + application.properties,
-   Phase 2: Product.java, Phase 3: ProductRepository.java,
-   Phase 4: MainController.java, Phase 5: AppException.java + delete
-   SwaggerConfig.java and CrudApplication.java).
-4. After Phase 1, verify that mvn dependency:resolve -q succeeds before continuing.
-5. After all phases, run mvn compile -q and report the result.
-6. If compilation fails, identify the error, fix the file, and retry up to 3 times.
-7. Report every file changed and confirm the final build status.
+Run the Quarkus migration.
 ```
 
-**What to expect:** The agent will produce file edits for each phase, run terminal commands to verify dependencies and compilation, and print a final report. This takes 3–5 minutes.
-
-> **Note:** If your Copilot plan does not support custom agents, use `@workspace` mode and paste the same prompt. The `copilot-instructions.md` and skill will still provide the migration rules automatically.
+**What to expect:** The agent first asks four questions (task list location, which phases, build verification, auto-fix preference). Answer them, confirm the plan, and the agent migrates every file in phase order, verifies the build, and prints a final report. This takes 3–5 minutes.
 
 ---
 
