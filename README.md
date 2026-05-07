@@ -61,7 +61,7 @@ This workshop walks you through exactly that — using GitHub Copilot Chat and a
 
 ## Get Started
 
-Clone or fork this repository and open it in VS Code to follow along.
+Clone this repository and open it in VS Code to follow along.
 
 Then start here: **[Exercise 1 — Analyse the Codebase](workshop/exercise-1.md)**
 
