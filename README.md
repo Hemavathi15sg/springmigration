@@ -61,42 +61,7 @@ This workshop walks you through exactly that — using GitHub Copilot Chat and a
 
 ## Get Started
 
-Clone or fork this repository, then run the existing Spring Boot application first so you can see the baseline:
-
-```shell
-mvn spring-boot:run
-```
-
-Open [http://localhost:8888/swagger-ui.html](http://localhost:8888/swagger-ui.html) to explore the current state of the API — five CRUD endpoints for `Product`. This is what you will keep working, just on Quarkus.
+Clone or fork this repository and open it in VS Code to follow along.
 
 Then start here: **[Exercise 1 — Analyse the Codebase](workshop/exercise-1.md)**
 
-## Resources
-
-- [Quarkus Migration Guide (Spring to Quarkus)](https://quarkus.io/guides/spring-di)
-- [Quarkus Hibernate ORM with Panache](https://quarkus.io/guides/hibernate-orm-panache)
-- [Quarkus RESTEasy Reactive](https://quarkus.io/guides/resteasy-reactive)
-- [SmallRye OpenAPI](https://quarkus.io/guides/openapi-swaggerui)
-- [Quarkus All Configuration Options](https://quarkus.io/guides/all-config)
-| `SwaggerConfig.java` | Manual Springfox bean configuration | Deleted — SmallRye OpenAPI handles it automatically |
-| `AppException.java` | `RuntimeException` | `WebApplicationException` (Jakarta RS) |
-
-## Get Started
-
-Clone or fork this repository, then run the existing Spring Boot application first so you can see the baseline:
-
-```shell
-mvn spring-boot:run
-```
-
-Open [http://localhost:8888/swagger-ui.html](http://localhost:8888/swagger-ui.html) to explore the current state of the API — five CRUD endpoints for `Product`. This is what you will keep working, just on Quarkus.
-
-Then start here: **[Exercise 1 — Analyse the Codebase](workshop/exercise-1.md)**
-
-## Resources
-
-- [Quarkus Migration Guide (Spring to Quarkus)](https://quarkus.io/guides/spring-di)
-- [Quarkus Hibernate ORM with Panache](https://quarkus.io/guides/hibernate-orm-panache)
-- [Quarkus RESTEasy Reactive](https://quarkus.io/guides/resteasy-reactive)
-- [SmallRye OpenAPI](https://quarkus.io/guides/openapi-swaggerui)
-- [Quarkus All Configuration Options](https://quarkus.io/guides/all-config)
