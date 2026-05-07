@@ -29,6 +29,7 @@ This workshop walks you through exactly that — using GitHub Copilot Chat and a
 ## Prerequisites
 
 - Java 17+ installed
+- Java 8 installed (to run the original Spring Boot app)
 - Maven 3.8+ installed
 - Valid GitHub Copilot subscription (Individual, Business, or Enterprise)
 - [VS Code](https://code.visualstudio.com/download) with the **GitHub Copilot Chat** extension installed
