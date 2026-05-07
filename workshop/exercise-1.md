@@ -28,7 +28,7 @@ Before analysing the code, run the application so you can see the current state 
 
 ### Check Your Java Version
 
-Spring Boot 2.x in this project requires **Java 8**. If you have Java 17 or higher installed, you need to set `JAVA_HOME` to point to a Java 8 installation before building.
+Spring Boot 2.x in this project requires **Java 8**. If you have Java 17 or higher installed, you need install java 8 https://adoptium.net/temurin/releases/?version=8 and set `JAVA_HOME` to point to a Java 8 installation before building.
 
 Open a PowerShell terminal and check your current Java version:
 
@@ -36,7 +36,7 @@ Open a PowerShell terminal and check your current Java version:
 java -version
 ```
 
-If the output shows Java 8 (version 1.8.x), skip to the [Build and Run](#build-and-run) section below.
+If the output shows Java 8 (version 1.8.x) , skip to the [Build and Run](#build-and-run) section below.
 
 If the output shows Java 17 or higher, continue to set `JAVA_HOME` to Java 8.
 
