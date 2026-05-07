@@ -26,11 +26,71 @@ The layers that need migration:
 
 Before analysing the code, run the application so you can see the current state of the API firsthand.
 
-```shell
-mvn spring-boot:run
+### Check Your Java Version
+
+Spring Boot 2.x in this project requires **Java 8**. If you have Java 17 or higher installed, you need to set `JAVA_HOME` to point to a Java 8 installation before building.
+
+Open a PowerShell terminal and check your current Java version:
+
+```powershell
+java -version
 ```
 
-Open [http://localhost:8888/swagger-ui.html](http://localhost:8888/swagger-ui.html) in your browser and explore what's already there:
+If the output shows Java 8 (version 1.8.x), skip to the [Build and Run](#build-and-run) section below.
+
+If the output shows Java 17 or higher, continue to set `JAVA_HOME` to Java 8.
+
+### Set JAVA_HOME to Java 8 (if needed)
+
+Find your Java 8 installation path. Common locations:
+- Eclipse Adoptium: `C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot` (example)
+- Oracle JDK: `C:\Program Files\Java\jdk1.8.0_xxx` (example)
+- OpenJDK: `C:\Program Files\OpenJDK\jdk-8` (example)
+
+In PowerShell, set `JAVA_HOME` and update `PATH`:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-8.0.482.8-hotspot"
+$env:PATH = "$env:JAVA_HOME\bin;" + $env:PATH
+```
+
+Replace the path above with your actual Java 8 installation path if it's different.
+
+Verify the change:
+
+```powershell
+java -version
+```
+
+It should now show Java 8.
+
+### Build and Run
+
+Use the Maven wrapper to clean, build, and package the application:
+
+```powershell
+.\mvnw clean package
+```
+
+Wait for the build to complete (it may take a minute or two).
+
+Once the build succeeds, run the JAR directly:
+
+```powershell
+java -jar target\crud-1.0.0.jar
+```
+
+You should see output indicating the server started on port 8888.
+
+### View the Swagger UI
+
+Open your browser and navigate to:
+
+```
+http://localhost:8888/swagger-ui.html
+```
+
+Explore what's already there:
 
 - Review the five endpoints: `GET /api/products`, `POST /api/products`, `GET /api/products/{id}`, `PUT /api/products/{id}`, `DELETE /api/products/{id}`
 - Notice the `Product` model fields: `id`, `name`, `description`, `price`, `createdAt`, `updatedAt`

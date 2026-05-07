@@ -48,11 +48,9 @@ When helping with this project, always apply the migration rules from the quarku
 
 Agent skills live in `.github/skills/<skill-name>/SKILL.md`. The `name` and `description` fields in the YAML front matter tell Copilot what the skill is for and when to load it automatically.
 
-1. Still in Copilot Chat, send:
+Go to chat settings, select skills-generate skill( workspace level- select .github folder and name it quarkus-migration) and paste the following content:
 
 ````
-Create the file .github/skills/quarkus-migration/SKILL.md with the following content exactly:
-
 ---
 name: quarkus-migration
 description: Governing rules for migrating a Spring Boot 2.x application to Quarkus 3.x. Use this skill when asked to migrate, convert, or update any Spring Boot file to Quarkus.

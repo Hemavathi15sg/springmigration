@@ -24,7 +24,7 @@ This workshop walks you through exactly that — using GitHub Copilot Chat and a
 | **Custom Copilot Agent** | Build a Migration Analyser (`.github/agents/`) that reads the codebase and produces a structured gap report |
 | **Agent Skill** | Encode the migration rules as a `SKILL.md` under `.github/skills/quarkus-migration/` — Copilot **auto-invokes** it whenever a migration-related prompt is detected, no manual attachment needed |
 | **Custom Instructions** | Add `.github/copilot-instructions.md` so Copilot always has project context (package name, target stack, Java version) loaded in every Chat session |
-| **GitHub Copilot Chat (agent mode)** | Drive each migration step — from `pom.xml` to Jakarta REST — with the skill silently governing every response |
+| **Quarkus Migrator Custom Agent** | Drive each migration step — from `pom.xml` to Jakarta REST — with the skill silently governing every response |
 
 ## Prerequisites
 
