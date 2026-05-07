@@ -1,154 +1,149 @@
-# Exercise 4 — Migrate Dependencies & Configuration
+# Exercise 4 — Run the Quarkus Migrator Agent
 
-> **Goal:** Use GitHub Copilot Chat to migrate `pom.xml` and `application.properties` from Spring Boot to Quarkus 3.x, then verify the Quarkus development server starts cleanly — before touching any Java source files.
+> **Goal:** Create the **Quarkus Migrator** custom agent, then trigger it with a single prompt. The agent reads the migration task list and the `quarkus-migration` skill rules, migrates every source file in phase order, verifies the build compiles cleanly, and reports the outcome — all without step-by-step instructions from you.
 
-> **Time:** ~10 minutes &nbsp;|&nbsp; **Prerequisite:** Task list created ([Exercise 3](exercise-3.md)) &nbsp;|&nbsp; **Track:** Required for Exercise 5
+![Time](https://img.shields.io/badge/Time-~15_min-blue)
+![Prerequisite](https://img.shields.io/badge/Prerequisite-Exercise_3_complete-yellow)
+![Track](https://img.shields.io/badge/Track-Required-red)
 
 ---
 
 ## Context
 
-Phase 1 of the migration plan is the foundation: without a valid Quarkus `pom.xml` and a correctly formatted `application.properties`, nothing else can compile or run. This exercise handles both files and ends with a working Quarkus dev server — even though the Java source files still contain Spring Boot annotations. That compile error is expected and is resolved in Exercise 5.
+In the previous exercises you:
+- Generated a gap report identifying 11 Spring → Quarkus deltas (Exercise 1)
+- Created the `quarkus-migration` skill and `copilot-instructions.md` (Exercise 2)
+- Produced a phased plan and `migration-tasks.md` (Exercise 3)
 
-**What changes in this exercise:**
+Now you will create a **custom agent** — a specialised Copilot mode with built-in instructions and tool access — that reads everything you built and executes the complete migration autonomously.
 
-| File | What Leaves | What Arrives |
-|------|------------|--------------|
-| `pom.xml` | `spring-boot-starter-parent`, all `spring-boot-starter-*` deps, Springfox swagger deps | `quarkus-bom` (BOM import), Quarkus extensions (see below) |
-| `application.properties` | All `spring.*` and `server.*` keys | All `quarkus.*` equivalents |
-
-**Quarkus extensions to add:**
-
-| Extension Artifact ID | Replaces |
-|----------------------|---------|
-| `quarkus-resteasy-reactive-jackson` | `spring-boot-starter-web` |
-| `quarkus-hibernate-orm-panache` | `spring-boot-starter-data-jpa` |
-| `quarkus-jdbc-h2` | `h2` (runtime scope) |
-| `quarkus-smallrye-openapi` | `springfox-swagger2` + `springfox-swagger-ui` |
+A custom agent differs from a simple chat prompt because it:
+- Has persistent instructions baked in (the 8-step migration procedure)
+- Knows which tools to use (`read`, `edit`, `create`, `delete`, `run`)
+- Runs build verification and retries automatically if compilation fails
 
 ---
 
-## Step 1 — Migrate `pom.xml`
+## Step 1 — Create the Quarkus Migrator Agent
 
-> The `quarkus-migration` skill and `.github/copilot-instructions.md` are loaded automatically. Copilot already knows the target Quarkus version, required extensions, and replacement rules — no attachment needed.
+The agent file already exists in the repository at [.github/agents/quarkus-migrator.agent.md](.github/agents/quarkus-migrator.agent.md). Inspect it before running:
 
-1. Open `pom.xml` in VS Code (make it the active editor tab)
-2. Open **Copilot Chat** in agent mode and send the following prompt:
+1. Open the file and read the frontmatter (`name`, `description`, `tools`) and the 8-step migration procedure.
+2. Notice the exact BOM XML in Step 2a and the exact annotation mapping table in Step 5 — these prevent the common groupId mistakes that break Quarkus builds.
+
+**If you want to understand how the agent was authored**, paste this prompt in Copilot Chat (`@workspace` mode):
 
 ```
-Migrate pom.xml from Spring Boot 2.x to Quarkus 3.x. Apply these changes:
-
-1. Replace the <parent> block (spring-boot-starter-parent) with Quarkus BOM import inside
-   <dependencyManagement>. Use Quarkus version 3.9.5.
-
-2. Remove all spring-boot-starter-* dependencies.
-
-3. Remove springfox-swagger2, springfox-swagger-ui, and rest-assured from dependencies.
-
-4. Add the quarkus-maven-plugin to <build><plugins> using the same Quarkus version.
-   Remove the spring-boot-maven-plugin.
-
-5. Add these Quarkus extension dependencies (groupId: io.quarkus):
-   - quarkus-resteasy-reactive-jackson
-   - quarkus-hibernate-orm-panache
-   - quarkus-jdbc-h2
-   - quarkus-smallrye-openapi
-
-6. Update <java.version> property to 17 (or remove it and set maven.compiler.source and
-   maven.compiler.target to 17).
-
-7. Keep groupId, artifactId, version, name, and description unchanged.
-
-Do not add any dependencies not listed here. Show the complete updated pom.xml.
+@workspace Explain what the Quarkus Migrator agent in .github/agents/quarkus-migrator.agent.md does and how it differs from a plain chat prompt.
 ```
-
-3. Review the diff carefully. Verify:
-   - No `spring-boot-*` entries remain
-   - All four Quarkus extensions are present
-   - `quarkus-maven-plugin` is present in `<build>`
-   - Java version is 17
-4. **Accept** the changes.
 
 ---
 
-## Step 2 — Migrate `application.properties`
+## Step 2 — Run the Migration with a Single Prompt
 
-1. Open `src/main/resources/application.properties` in VS Code
-2. In Copilot Chat (same session), send:
+Open Copilot Chat and switch to the **Quarkus Migrator** agent using the agent picker (`@Quarkus Migrator` or selecting it from the mode dropdown).
+
+Paste this single prompt:
 
 ```
-Migrate application.properties from Spring Boot format to Quarkus 3.x. Apply these changes:
+Run the full Quarkus migration.
 
-1. Replace spring.datasource.url with quarkus.datasource.jdbc.url
-   Use: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-
-2. Replace spring.datasource.driver-class-name with quarkus.datasource.jdbc.driver
-   Use: org.h2.Driver
-
-3. Replace spring.datasource.username / spring.datasource.password with
-   quarkus.datasource.username and quarkus.datasource.password
-
-4. Replace spring.jpa.hibernate.ddl-auto=create with quarkus.hibernate-orm.database.generation=drop-and-create
-
-5. Replace spring.jpa.show-sql=true with quarkus.hibernate-orm.log.sql=true
-
-6. Replace server.port=8888 with quarkus.http.port=8080
-   (Quarkus default port is 8080; we align to that)
-
-7. Add: quarkus.datasource.db-kind=h2
-
-8. Remove any remaining spring.* or server.* keys.
-
-Show the complete updated application.properties.
+1. Read workshop/migration-tasks.md for the ordered task list.
+2. Read .github/skills/quarkus-migration/SKILL.md for the five migration rules.
+3. Migrate all files in phase order (Phase 1: pom.xml + application.properties,
+   Phase 2: Product.java, Phase 3: ProductRepository.java,
+   Phase 4: MainController.java, Phase 5: AppException.java + delete
+   SwaggerConfig.java and CrudApplication.java).
+4. After Phase 1, verify that mvn dependency:resolve -q succeeds before continuing.
+5. After all phases, run mvn compile -q and report the result.
+6. If compilation fails, identify the error, fix the file, and retry up to 3 times.
+7. Report every file changed and confirm the final build status.
 ```
 
-3. Review the diff. Verify no `spring.*` or `server.*` keys remain.
-4. **Accept** the changes.
+**What to expect:** The agent will produce file edits for each phase, run terminal commands to verify dependencies and compilation, and print a final report. This takes 3–5 minutes.
+
+> **Note:** If your Copilot plan does not support custom agents, use `@workspace` mode and paste the same prompt. The `copilot-instructions.md` and skill will still provide the migration rules automatically.
 
 ---
 
-## Step 3 — Verify Quarkus Starts
+## Step 3 — Review and Accept the Diffs
 
-Run the Quarkus dev server:
+After the agent finishes, review each changed file in the diff editor before accepting:
 
-```shell
+| File | Key change to verify |
+|------|---------------------|
+| `pom.xml` | BOM groupId is `io.quarkus.platform`, extension deps have groupId `io.quarkus` with **no** `<version>` tag, `quarkus-arc` is present |
+| `application.properties` | All `spring.*` and `server.*` keys replaced with `quarkus.*`; `quarkus.datasource.db-kind=h2` present |
+| `model/Product.java` | All imports changed from `javax.persistence.*` to `jakarta.persistence.*` |
+| `repository/ProductRepository.java` | Now a `class` with `@ApplicationScoped` implementing `PanacheRepository<Product>` |
+| `controller/MainController.java` | `@RestController` replaced by `@Path` + `@ApplicationScoped`; `@Autowired` → `@Inject`; `ResponseEntity` → `Response` |
+| `exception/AppException.java` | Extends `WebApplicationException`; constructor calls `super(Response.status(...).entity(...).build())` |
+| `config/SwaggerConfig.java` | **Deleted** |
+| `CrudApplication.java` | **Deleted** |
+
+Accept all changes once you are satisfied.
+
+---
+
+## Step 4 — Verify the Application Starts
+
+Start Quarkus dev mode:
+
+```bash
 mvn quarkus:dev
 ```
 
-> **Expected result at this stage:** Quarkus will **fail to compile** because `MainController.java`, `ProductRepository.java`, and other files still use Spring Boot imports. That is correct — you have only changed the build and config so far.
+Wait for the startup message:
 
-To confirm Phase 1 is correct anyway, check the error output:
+```
+__  ____  __  _____   ___  __ ____  ______
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/
+Quarkus 3.9.5 on JVM started in ...s. Listening on: http://localhost:8080
+```
 
-- Errors should be **compilation errors** about `org.springframework.*` packages not found — that means Quarkus is picking up the source files correctly
-- Errors should **not** be about `pom.xml` syntax, missing plugins, or Quarkus BOM resolution failures
+Open **http://localhost:8080/q/swagger-ui** and test each endpoint:
 
-If you see BOM or plugin errors, revisit Step 1 before continuing.
-
-> **Optional quick check:** Run `mvn dependency:resolve -q` to confirm all four Quarkus extension JARs resolve without errors before attempting `quarkus:dev`.
+| # | Method | URL | Expected response |
+|---|--------|-----|-------------------|
+| 1 | `GET` | `/api/products` | `200 OK` — empty array `[]` |
+| 2 | `POST` | `/api/products` | `201 Created` — `{"success":true,"message":"Product was successfully saved."}` |
+| 3 | `GET` | `/api/products/1` | `200 OK` — the product you just created |
+| 4 | `PUT` | `/api/products/1` | `200 OK` — updated product |
+| 5 | `DELETE` | `/api/products/1` | `200 OK` — deletion confirmation |
 
 ---
 
 ## Validation Checklist
 
-Before moving to Exercise 5, confirm:
+Confirm all 12 items before moving on:
 
-| Check | Status |
-|-------|--------|
-| `pom.xml` has no `spring-boot-*` dependencies | ☐ |
-| `pom.xml` includes `quarkus-resteasy-reactive-jackson` | ☐ |
-| `pom.xml` includes `quarkus-hibernate-orm-panache` | ☐ |
-| `pom.xml` includes `quarkus-jdbc-h2` | ☐ |
-| `pom.xml` includes `quarkus-smallrye-openapi` | ☐ |
-| `pom.xml` has `quarkus-maven-plugin` in `<build>` | ☐ |
-| `application.properties` has `quarkus.datasource.jdbc.url` | ☐ |
-| `application.properties` has `quarkus.http.port=8080` | ☐ |
-| `mvn dependency:resolve` completes without errors | ☐ |
-| `mvn quarkus:dev` fails with Spring import compilation errors (not BOM/plugin errors) | ☐ |
+- [ ] `pom.xml` — `<parent>` block removed
+- [ ] `pom.xml` — `<dependencyManagement>` uses `io.quarkus.platform:quarkus-bom:3.9.5`
+- [ ] `pom.xml` — Quarkus extension `<dependency>` entries use `io.quarkus` with no `<version>`
+- [ ] `pom.xml` — `quarkus-arc` extension present
+- [ ] `pom.xml` — Quarkus Maven plugin uses `io.quarkus.platform` groupId
+- [ ] `application.properties` — no `spring.*` or `server.*` keys remain
+- [ ] `Product.java` — all imports use `jakarta.persistence.*`
+- [ ] `ProductRepository.java` — `class` (not `interface`), `@ApplicationScoped`, `PanacheRepository<Product>`
+- [ ] `MainController.java` — `@Path`, `@Inject`, `Response` return types, `@PathParam`
+- [ ] `AppException.java` — extends `WebApplicationException`
+- [ ] `SwaggerConfig.java` — deleted
+- [ ] `CrudApplication.java` — deleted
+- [ ] `mvn compile -q` — exits with code 0
+- [ ] `http://localhost:8080/q/swagger-ui` — shows 5 endpoints
 
 ---
 
 ## Done?
 
-Phase 1 is complete. The build foundation is in place. Head to [Exercise 5 — Migrate the Application Code](exercise-5.md) to migrate every Java source file layer by layer and bring the Quarkus API fully online.
+You have completed the workshop! The Spring Boot CRUD service is now fully migrated to Quarkus 3.9.5 with:
 
-**Next: [Exercise 5 →](exercise-5.md)**
+- **RESTEasy Reactive** (JAX-RS) replacing Spring MVC
+- **Hibernate ORM Panache** replacing Spring Data JPA
+- **SmallRye OpenAPI** replacing Springfox Swagger
+- **Quarkus Arc** (CDI) replacing Spring DI
+- A custom agent and skill that encode the migration rules for future use
+
+**← [Back to Exercise 3](exercise-3.md)** | **[Back to README](../README.md)**

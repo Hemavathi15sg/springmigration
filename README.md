@@ -43,9 +43,8 @@ This workshop walks you through exactly that — using GitHub Copilot Chat and a
 | 1 | [Analyse the Codebase](workshop/exercise-1.md) | Create a Migration Analyser agent and generate a gap report | ~5 min |
 | 2 | [Define Migration Principles](workshop/exercise-2.md) | Capture governing migration rules as a reusable prompt file | ~8 min |
 | 3 | [Plan the Migration](workshop/exercise-3.md) | Produce a phased plan and file-level task list | ~8 min |
-| 4 | [Migrate Dependencies & Config](workshop/exercise-4.md) | Migrate `pom.xml` and `application.properties`; start Quarkus | ~10 min |
-| 5 | [Migrate the Application Code](workshop/exercise-5.md) | Layer-by-layer code migration; verify all 5 endpoints | ~12 min |
-| — | **Total** | | **~43 min** |
+| 4 | [Run the Quarkus Migrator Agent](workshop/exercise-4.md) | Create & run the Quarkus Migrator agent; end-to-end migration with build verification | ~15 min |
+| — | **Total** | | **~36 min** |
 
 ## What Gets Migrated
 
