@@ -29,19 +29,19 @@ The agent file already exists in the repository at [.github/agents/quarkus-migra
 1. Open the file and read the frontmatter (`name`, `description`, `tools`) and the 8-step migration procedure.
 2. Notice the exact BOM XML in Step 2a and the exact annotation mapping table in Step 5 — these prevent the common groupId mistakes that break Quarkus builds.
 
-**If you want to understand how the agent was authored**, paste this prompt in Copilot Chat (`@workspace` mode):
+**If you want to understand how the agent was authored**, paste this prompt in Copilot Chat (`ASK` agent mode):
 
 ```
-@workspace Explain what the Quarkus Migrator agent in .github/agents/quarkus-migrator.agent.md does and how it differs from a plain chat prompt.
+Explain what the Quarkus Migrator agent in .github/agents/quarkus-migrator.agent.md does and how it differs from a plain chat prompt.
 ```
 
 ---
 
 ## Step 2 — Run the Migration with a Single Prompt
 
-Open Copilot Chat and switch to the **Quarkus Migrator** agent using the agent picker (`@Quarkus Migrator` or selecting it from the mode dropdown).
+Open Copilot Chat and switch to the **Quarkus Migrator** agent using the agent picker (selecting `Quarkus Migrator` from the mode dropdown).
 
-Paste this single prompt:
+Paste this single prompt
 
 ```
 Run the full Quarkus migration.
