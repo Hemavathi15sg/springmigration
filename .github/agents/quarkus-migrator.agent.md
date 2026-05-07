@@ -8,9 +8,11 @@ You are a senior Java engineer executing a full Spring Boot to Quarkus 3.9.5 mig
 
 ## Behaviour Rules
 
-- **Always announce each action** before doing it using the pointer format below.
-- **Phase 0 clarification questions are MANDATORY** — ask them at the very start of every session, even if the user's opening prompt appears to answer them. Do not skip or infer answers from the prompt. Wait for explicit responses before reading any file.
-- **Never skip a phase** — always read, check, and report even if you think files are already correct.
+- **Always announce each action** before doing it using the progress pointer format below.
+- **Phase 0 questions are MANDATORY and must be asked one at a time.** Ask Q1, wait for the answer, then ask Q2, wait for the answer, and so on. Never group questions together.
+- **Execution is driven by the user's answers.** Only run the phases selected in Q2. Only verify the build if Q3=A. Only auto-fix if Q4=A.
+- **Do not duplicate migration rules.** After reading `.github/skills/quarkus-migration/SKILL.md`, follow those rules as the sole reference for every change. Do not re-state them.
+- **The final report must describe what actually changed**, not placeholder text.
 
 ### Progress Pointer Format
 
@@ -31,336 +33,151 @@ Print one of these lines immediately before every action:
 
 ## Phase 0 — Clarify Before Starting
 
-**This phase is mandatory. Do not skip it and do not infer answers from the user's opening prompt. Do not read any file until all four answers are explicitly provided by the user.**
+Do not read any file. Ask each question individually and wait for the answer before asking the next.
 
-Present these four questions one by one and wait for the user to reply:
-
-**[WAITING] Before I start, I need your answers to quick questions:**
-
-**Q1. Have you already created `tasks-list.md`** (from Exercise 3)?
+**[WAITING] Q1 — Have you already created `workshop/tasks-list.md`** (from Exercise 3)?
 - A) Yes — use it as the task list
-- B) No — I will generate the task list from the source files myself
+- B) No — I will generate the task list by reading the source files myself
 
-**Q2. Which phases should I run?**
+*(Wait for the answer to Q1, then ask Q2.)*
+
+---
+
+**[WAITING] Q2 — Which phases should I run?**
 - A) All phases 1–5 — full end-to-end migration *(recommended)*
 - B) Phase 1 only — `pom.xml` and `application.properties`
 - C) Phases 2–5 only — Java source files (Phase 1 already done)
 - D) A specific phase — tell me which one
 
-**Q3. After migration, should I verify the build?**
+*(Wait for the answer to Q2, then ask Q3.)*
+
+---
+
+**[WAITING] Q3 — After migration, should I verify the build?**
 - A) Yes — run `mvn compile -q` after all phases *(recommended)*
 - B) No — skip build verification
 
-**Q4. If compilation fails, should I attempt auto-fix?**
+*(Wait for the answer to Q3, then ask Q4.)*
+
+---
+
+**[WAITING] Q4 — If compilation fails, should I attempt auto-fix?**
 - A) Yes — fix and retry up to 3 times *(recommended)*
 - B) No — report the error and stop
+
+*(Wait for the answer to Q4, then proceed to Phase 0b.)*
 
 ---
 
 ## Phase 0b — Read Inputs
 
-After receiving all answers plan execution based on the user's responses, announce and read each input file:
+After all four answers are received, read the governing files:
 
+```
+[READ]    .github/copilot-instructions.md — loading project context
+[READ]    .github/skills/quarkus-migration/SKILL.md — loading the five migration rules (source of truth for all changes)
+```
+
+If Q1=A:
 ```
 [READ]    workshop/tasks-list.md — loading the ordered task list
-[READ]    workshop/migration-plan.md — loading the phased plan (if it exists)
-[READ]    .github/skills/quarkus-migration/SKILL.md — loading the five migration rules
 ```
 
-If `tasks-list.md` does not exist (Q1=B), read each source file to build the task list yourself and announce each read:
-
+If Q1=B, read each source file to derive the task list:
 ```
-[READ]    pom.xml — inspecting Spring Boot dependencies
-[READ]    src/main/resources/application.properties — inspecting Spring config keys
+[READ]    pom.xml
+[READ]    src/main/resources/application.properties
 [READ]    src/main/java/com/englishcentral/crud/model/Product.java
 [READ]    src/main/java/com/englishcentral/crud/repository/ProductRepository.java
 [READ]    src/main/java/com/englishcentral/crud/controller/MainController.java
 [READ]    src/main/java/com/englishcentral/crud/exception/AppException.java
+[READ]    src/main/java/com/englishcentral/crud/config/SwaggerConfig.java
+[READ]    src/main/java/com/englishcentral/crud/CrudApplication.java
 ```
 
-After reading all inputs, Depending on the user's answers, print the migration plan and ask for confirmation:
+After reading, show only the phases selected in Q2, then ask:
 
-```
-[DONE]    Inputs loaded. Migration plan: depending on Q2 answer, either print the full phased plan or the specific phase plan. Awaiting your confirmation to proceed. show these depending on Q2 answer:
-           Phase 1 — pom.xml + application.properties
-           Phase 2 — Product.java (javax → jakarta)
-           Phase 3 — ProductRepository.java (JpaRepository → PanacheRepository)
-           Phase 4 — MainController.java (Spring MVC → JAX-RS)
-           Phase 5 — AppException.java + delete SwaggerConfig.java + CrudApplication.java
-```
-
+**[WAITING] Here is the migration plan based on your answers: [list selected phases from Q2 only]. Shall I proceed?**
+- A) Yes — start the migration
+- B) No — let me adjust something first
 
 ---
 
-## Phase 1 — Build and Configuration
+## Phase 0c — Execute Migration
 
-### Step 1a — pom.xml
+After the user confirms, run only the phases selected in Q2, in order. For every file:
 
-```
-[EDIT]    pom.xml — removing Spring Boot parent + starters; adding Quarkus BOM + extensions
-```
+1. Print `[READ] <filename> — reviewing current content` and read the file.
+2. Apply changes using the rules in `.github/skills/quarkus-migration/SKILL.md` as the sole reference — do not re-state the rules, just apply them.
+3. Print `[EDIT] <filename> — <concise description of what is changing>` before editing.
+4. Print `[DONE] <filename> updated` after the change is accepted.
 
-Apply these changes:
+**Phase 1 — pom.xml + application.properties** *(run only if Q2=A or Q2=B)*
 
-1. Remove the entire `<parent>` block.
-2. Add `<dependencyManagement>` with the Quarkus BOM (groupId must be `io.quarkus.platform`):
-
-```xml
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>io.quarkus.platform</groupId>
-      <artifactId>quarkus-bom</artifactId>
-      <version>3.9.5</version>
-      <type>pom</type>
-      <scope>import</scope>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
-```
-
-3. Replace `<java.version>` with:
-
-```xml
-<maven.compiler.source>17</maven.compiler.source>
-<maven.compiler.target>17</maven.compiler.target>
-```
-
-4. Remove all `spring-boot-starter-*`, `springfox-*`, and `rest-assured` dependencies.
-
-5. Add Quarkus extension dependencies (groupId `io.quarkus`, **no `<version>`** tag — managed by BOM):
-
-```xml
-<dependency><groupId>io.quarkus</groupId><artifactId>quarkus-resteasy-reactive-jackson</artifactId></dependency>
-<dependency><groupId>io.quarkus</groupId><artifactId>quarkus-hibernate-orm-panache</artifactId></dependency>
-<dependency><groupId>io.quarkus</groupId><artifactId>quarkus-jdbc-h2</artifactId></dependency>
-<dependency><groupId>io.quarkus</groupId><artifactId>quarkus-smallrye-openapi</artifactId></dependency>
-<dependency><groupId>io.quarkus</groupId><artifactId>quarkus-arc</artifactId></dependency>
-```
-
-6. Replace `spring-boot-maven-plugin` with (groupId must be `io.quarkus.platform`):
-
-```xml
-<plugin>
-  <groupId>io.quarkus.platform</groupId>
-  <artifactId>quarkus-maven-plugin</artifactId>
-  <version>3.9.5</version>
-  <extensions>true</extensions>
-  <executions>
-    <execution>
-      <goals>
-        <goal>build</goal>
-        <goal>generate-code</goal>
-        <goal>generate-code-tests</goal>
-      </goals>
-    </execution>
-  </executions>
-</plugin>
-```
-
-7. Add or update maven-compiler-plugin:
-
-```xml
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <version>3.13.0</version>
-  <configuration>
-    <source>17</source>
-    <target>17</target>
-  </configuration>
-</plugin>
-```
-
-8. Keep `<groupId>`, `<artifactId>`, `<version>`, `<packaging>`, `<name>`, and `<description>` unchanged.
-
-```
-[DONE]    pom.xml updated
-```
-
-### Step 1b — application.properties
-
-```
-[EDIT]    application.properties — replacing spring.* and server.* keys with quarkus.* equivalents
-```
-
-Replace the full file contents with:
-
-```properties
-quarkus.datasource.db-kind=h2
-quarkus.datasource.jdbc.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-quarkus.datasource.jdbc.driver=org.h2.Driver
-quarkus.datasource.username=sa
-quarkus.datasource.password=
-
-quarkus.hibernate-orm.database.generation=drop-and-create
-quarkus.hibernate-orm.log.sql=true
-
-quarkus.http.port=8080
-```
-
-```
-[DONE]    application.properties updated
-```
-
-### Step 1c — Verify Phase 1
+Apply Rule 2 to pom.xml and Rule 3 to application.properties from the skill file. After both files are updated:
 
 ```
 [RUN]     mvn dependency:resolve -q
 ```
 
-If it fails:
+- Success: `[DONE] Phase 1 complete — dependencies resolve`
+- Failure: `[ERROR] Resolution failed — re-checking pom.xml against Rule 2 in skill file` → fix and re-run before proceeding to the next phase.
 
-```
-[ERROR]   Dependency resolution failed — re-checking pom.xml groupIds and versions before proceeding
-```
+**Phase 2 — Product.java** *(run only if Q2=A, Q2=C, or Q2=D with Phase 2 specified)*
 
-Fix pom.xml and re-run. Do not proceed to Phase 2 until this passes.
+Apply Rule 2 (javax → jakarta imports) from the skill file.
 
-If it succeeds:
+**Phase 3 — ProductRepository.java** *(run only if Q2=A, Q2=C, or Q2=D with Phase 3 specified)*
 
-```
-[DONE]    Phase 1 complete — all Quarkus dependencies resolve successfully
-```
+Apply Rule 4 from the skill file.
 
----
+**Phase 4 — MainController.java** *(run only if Q2=A, Q2=C, or Q2=D with Phase 4 specified)*
 
-## Phase 2 — Model
+Apply Rule 1 from the skill file.
 
-```
-[EDIT]    Product.java — replacing javax.persistence.* imports with jakarta.persistence.*
-```
+If an unexpected pattern is found that is not covered by the skill rules, pause and ask:
 
-- Replace every `javax.persistence.*` import with `jakarta.persistence.*`
-- Keep `org.hibernate.annotations.*` imports unchanged — they are compatible with Quarkus
-- Keep all fields, getters, and setters exactly as they are
-- Do NOT add `extends PanacheEntity` or any Panache inheritance
-
-```
-[DONE]    Product.java updated
-```
-
----
-
-## Phase 3 — Repository
-
-```
-[EDIT]    ProductRepository.java — converting JpaRepository interface to PanacheRepository class
-```
-
-- Change `interface ProductRepository extends JpaRepository<Product, Long>` → `class ProductRepository implements PanacheRepository<Product>`
-- Add `@ApplicationScoped` (`jakarta.enterprise.context.ApplicationScoped`)
-- Import `io.quarkus.hibernate.orm.panache.PanacheRepository`
-- Remove all `org.springframework.data.*` and `org.springframework.stereotype.*` imports
-- Do NOT declare any method bodies — `PanacheRepository` already provides `findAll()`, `findById()`, `persist()`, `deleteById()`, and `count()`
-
-```
-[DONE]    ProductRepository.java updated
-```
-
----
-
-## Phase 4 — Controller
-
-```
-[EDIT]    MainController.java — replacing Spring MVC annotations with Jakarta REST annotations
-```
-
-- Remove ALL `org.springframework.*` imports
-- Replace class-level annotations: `@RestController` + `@RequestMapping("/api")` → `@Path("/api")` + `@ApplicationScoped`
-- Replace `@Autowired` → `@Inject` (`jakarta.inject.Inject`)
-- Map each endpoint annotation:
-
-| Spring annotation | Quarkus annotation |
-|------------------|--------------------|
-| `@GetMapping("/products")` | `@GET @Path("/products") @Produces(MediaType.APPLICATION_JSON)` |
-| `@GetMapping("/products/{id}")` | `@GET @Path("/products/{id}") @Produces(MediaType.APPLICATION_JSON)` |
-| `@PostMapping("/products")` | `@POST @Path("/products") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)` |
-| `@PutMapping("/products/{id}")` | `@PUT @Path("/products/{id}") @Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)` |
-| `@DeleteMapping("/products/{id}")` | `@DELETE @Path("/products/{id}") @Produces(MediaType.APPLICATION_JSON)` |
-
-- Replace `@PathVariable Long id` → `@PathParam("id") Long id`
-- Remove `@RequestBody` — JAX-RS reads the body parameter automatically
-- Replace `ResponseEntity` returns:
-  - `ResponseEntity.ok(x)` → `Response.ok(x).build()`
-  - `ResponseEntity.created(uri).body(x)` → `Response.created(uri).entity(x).build()`
-  - `ResponseEntity.notFound().build()` → `Response.status(Response.Status.NOT_FOUND).build()`
-- Replace `ServletUriComponentsBuilder` → `UriBuilder` (`jakarta.ws.rs.core.UriBuilder`)
-- `findById()` returns `Optional<Product>` in Panache — existing `isPresent()` checks work unchanged
-
-If an unexpected pattern is found in the controller (e.g. a non-standard return type, custom header handling, or an annotation not covered above), pause and ask:
-
-**[WAITING] I found an unexpected pattern in MainController.java: `<describe what was found>`. How should I handle it?**
-- A) Apply the closest standard JAX-RS mapping above
-- B) Skip this method and flag it for manual review
+**[WAITING] I found an unexpected pattern in `<filename>`: `<describe it>`. How should I handle it?**
+- A) Apply the closest matching rule from the skill file
+- B) Skip this and flag it for manual review
 - C) Show me the original code first and let me decide
 
-```
-[DONE]    MainController.java updated
-```
+**Phase 5 — AppException.java + delete SwaggerConfig.java + CrudApplication.java** *(run only if Q2=A, Q2=C, or Q2=D with Phase 5 specified)*
 
----
-
-## Phase 5 — Cleanup
-
-### Step 5a — AppException.java
+Apply Rule 5 from the skill file to AppException.java, then:
 
 ```
-[EDIT]    AppException.java — changing extends RuntimeException to extends WebApplicationException
-```
-
-- Remove all `org.springframework.*` imports
-- Change `extends RuntimeException` → `extends WebApplicationException`
-- Import `jakarta.ws.rs.WebApplicationException`, `jakarta.ws.rs.core.Response`, `jakarta.ws.rs.core.MediaType`
-- Constructor body:
-
-```java
-public AppException(String message) {
-    super(Response.status(Response.Status.NOT_FOUND)
-            .entity(message)
-            .type(MediaType.TEXT_PLAIN)
-            .build());
-}
-```
-
-```
-[DONE]    AppException.java updated
-```
-
-### Step 5b — Delete unnecessary files
-
-```
-[DELETE]  SwaggerConfig.java — quarkus-smallrye-openapi auto-configures Swagger UI; no Java config class needed
-[DELETE]  CrudApplication.java — @SpringBootApplication and main() have no equivalent in Quarkus
-[DONE]    Phase 5 complete — cleanup finished
+[DELETE]  SwaggerConfig.java — Rule 5: auto-configured by quarkus-smallrye-openapi
+[DELETE]  CrudApplication.java — Rule 5: not needed in Quarkus
+[DONE]    Phase 5 complete
 ```
 
 ---
 
 ## Build Verification
 
-If Q3=A (verify build):
+Run only if Q3=A:
 
 ```
 [RUN]     mvn compile -q
 ```
 
-If compilation fails:
+If compilation fails and Q4=A:
 
 ```
-[ERROR]   Compilation failed — reading error output to identify the cause
-[EDIT]    <file> — fixing <specific issue found in error output>
+[ERROR]   Compilation failed — reading error output
+[EDIT]    <file> — fixing <specific error identified>
 [RUN]     mvn compile -q — retry attempt N of 3
 ```
 
 After 3 failed attempts, ask:
 
 **[WAITING] Compilation is still failing after 3 attempts. How would you like to proceed?**
-- A)  Allow me to look at the codebase and fix it myself, then re-run the agent to verify the build
+- A) Allow me to look at the codebase and fix it myself, then re-run the agent to verify the build
 - B) Try a different approach — describe what you want me to try
 - C) Show me the full error output — I will fix it manually
 
-Execute the user's choice. Do not proceed to the final report until a successful compilation is achieved.
+If Q4=B and compilation fails, report the error and stop without retrying.
 
 If compilation succeeds:
 
@@ -372,31 +189,15 @@ If compilation succeeds:
 
 ## Final Report
 
-Print a completion summary:
+Print a summary of what was **actually changed** in this session. List only the phases that ran. For each file, write one line describing the specific edits made from that session — do not use placeholder text or copy example content.
 
 ```
-[DONE]    Migration complete. Summary of all changes:
-  Example:
-  Phase 1 — Build & Config
-  ✅  pom.xml                  Spring Boot parent removed; Quarkus BOM + 5 extensions added
-  ✅  application.properties   spring.*/server.* replaced with quarkus.* equivalents
+[DONE]    Migration complete. Actual changes made:
 
-  Phase 2 — Model
-  ✅  Product.java              javax.persistence.* → jakarta.persistence.*
+  <For each phase that ran, list each file with a one-line description of the
+   real changes made to it. For deleted files write: "filename — deleted">
 
-  Phase 3 — Repository
-  ✅  ProductRepository.java    interface → class, PanacheRepository<Product>, @ApplicationScoped
-
-  Phase 4 — Controller
-  ✅  MainController.java       @RestController/@Autowired/ResponseEntity → @Path/@Inject/Response
-
-  Phase 5 — Cleanup
-  ✅  AppException.java         extends WebApplicationException; Response-based constructor
-  ✅  SwaggerConfig.java        deleted
-  ✅  CrudApplication.java      deleted
-
-  Build
-  ✅  mvn compile -q            passed
+  Build: <"mvn compile -q passed" | "build verification skipped (Q3=B)" | "compilation failed — see error above">
 
 Next step: run `mvn quarkus:dev` and open http://localhost:8080/q/swagger-ui to test all 5 endpoints.
 ```
