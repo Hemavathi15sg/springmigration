@@ -2,9 +2,7 @@
 
 > **Goal:** Create the **Quarkus Migrator** custom agent, then trigger it with a single prompt. The agent reads the migration task list and the `quarkus-migration` skill rules, migrates every source file in phase order, verifies the build compiles cleanly, and reports the outcome — all without step-by-step instructions from you.
 
-![Time](https://img.shields.io/badge/Time-~15_min-blue)
-![Prerequisite](https://img.shields.io/badge/Prerequisite-Exercise_3_complete-yellow)
-![Track](https://img.shields.io/badge/Track-Required-red)
+> **Time:** ~15 minutes &nbsp;|&nbsp; **Prerequisite:** Phased plan and `migration-tasks.md` created ([Exercise 3](exercise-3.md)) &nbsp;|&nbsp; **Track:** Required — final exercise
 
 ---
 
